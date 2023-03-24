@@ -1,11 +1,28 @@
-import React from "react";
+import { useEffect } from "react";
 import { HiOutlineTrash } from "react-icons/hi";
-import { Link } from "react-router-dom";
+import { Link, useOutletContext } from "react-router-dom";
+import { useCartContext } from "../contexts";
+import { numberToUSD } from "../utils/numberToUSD";
 
-export const Checkout = () => {
+interface CheckoutProps {
+  title: string;
+}
+
+export const Checkout = ({ title }: CheckoutProps) => {
+  const { quantityCart, cartItems, removeItemCart, totalPrice } =
+    useCartContext();
+
+  const { setTitle } = useOutletContext<any>();
+
+  useEffect(() => {
+    setTitle(title);
+  }, []);
+
   return (
     <div className="flex flex-col gap-5 rounded-lg border border-background/50 p-6 shadow-md">
-      <div className="text-2xl font-semibold">Cart Item (2) </div>
+      <div className="text-2xl font-semibold">
+        Cart Item ({quantityCart()}){" "}
+      </div>
 
       <div className="relative overflow-x-auto">
         <table className="w-full text-left">
@@ -19,46 +36,36 @@ export const Checkout = () => {
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b bg-white">
-              <th className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 ">
-                <div className="flex items-center gap-2">
-                  <img
-                    className="h-14 w-14 rounded-lg object-cover"
-                    src="https://picsum.photos/700?image=1"
-                    alt=""
-                  />
-                  <span>MacBook Air Pro</span>
-                </div>
-              </th>
-              <td className="px-6 py-4">Silver</td>
-              <td className="px-6 py-4">Laptop</td>
-              <td className="px-6 py-4">$2999</td>
-              <td>
-                <div className="flex h-10 w-10 cursor-pointer items-center justify-center  rounded-full duration-300 hover:bg-gray-100">
-                  <HiOutlineTrash size={22} className="text-negative" />
-                </div>
-              </td>
-            </tr>
-            <tr className="border-b bg-white ">
-              <th className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 ">
-                <div className="flex items-center gap-2">
-                  <img
-                    className="h-14 w-14 rounded-lg object-cover"
-                    src="https://picsum.photos/700?image=1"
-                    alt=""
-                  />
-                  <span>MacBook Air Pro</span>
-                </div>
-              </th>
-              <td className="px-6 py-4">White</td>
-              <td className="px-6 py-4">Laptop PC</td>
-              <td className="px-6 py-4">$1999</td>
-              <td>
-                <div className="flex h-10 w-10 cursor-pointer items-center justify-center  rounded-full duration-300 hover:bg-gray-100">
-                  <HiOutlineTrash size={22} className="text-negative" />
-                </div>
-              </td>
-            </tr>
+            {cartItems?.map((product) => {
+              return (
+                <tr key={product.productId} className="border-b bg-white">
+                  <th className="whitespace-nowrap px-6 py-4 font-medium text-gray-900 ">
+                    <div className="flex items-center gap-2">
+                      <img
+                        className="h-14 w-14 rounded-lg object-cover"
+                        src={product.url}
+                        alt="Product Image"
+                      />
+                      <span>{product.name}</span>
+                    </div>
+                  </th>
+                  <td className="px-6 py-4">{numberToUSD(product.price)}</td>
+                  <td className="px-6 py-4">{product.quantity}</td>
+                  <td className="px-6 py-4">
+                    {numberToUSD(product.price * product.quantity)}
+                  </td>
+
+                  <td>
+                    <button
+                      onClick={() => removeItemCart(product.productId)}
+                      className="flex h-10 w-10 cursor-pointer items-center justify-center  rounded-full duration-300 hover:bg-gray-100"
+                    >
+                      <HiOutlineTrash size={22} className="text-negative" />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -71,16 +78,12 @@ export const Checkout = () => {
             <div>$25</div>
           </li>
           <li className="flex justify-between">
-            <div>Discount 5%</div>
-            <div className="text-negative">- $2</div>
-          </li>
-          <li className="flex justify-between">
             <div>Shipping Charges</div>
             <div>-</div>
           </li>
-          <li className="flex justify-between font-bold text-black">
+          <li className="flex text-lg justify-between font-bold text-black">
             <div>Total</div>
-            <div>$30</div>
+            <div>{numberToUSD(totalPrice())}</div>
           </li>
         </ul>
       </div>

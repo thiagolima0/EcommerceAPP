@@ -1,15 +1,53 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useQuery } from "react-query";
+import { Link, useOutletContext, useParams } from "react-router-dom";
+import { Loading } from "../components";
+import { CartItem, useCartContext } from "../contexts";
+import { Api } from "../providers/Api";
 
-export const ProductDetail = () => {
-  const [count, setCount] = useState(1);
+interface ProductDetailProps {
+  title: string;
+}
+
+export const ProductDetail = ({ title }: ProductDetailProps) => {
+  const { setTitle } = useOutletContext<any>();
+
+  useEffect(() => {
+    setTitle(title);
+  }, []);
+
+  const { addItemCart, decreaseItemQuantity, getItemQuantity } =
+    useCartContext();
+
+  const { id } = useParams();
+  const [quantity, setQuantity] = useState(1);
+
+  const {
+    data: product,
+    isLoading,
+    isSuccess,
+    error,
+  } = useQuery(["productId"], async () => {
+    const { data } = await Api.get(`/todos/${id}`);
+
+    const { title: name, userId: categoryId, id: productId } = data;
+    return {
+      name,
+      categoryId,
+      productId,
+      price: name.length * productId,
+      url: `https://picsum.photos/700?image=${productId}`,
+    };
+  });
+
+  if (isLoading) return <Loading />;
 
   return (
-    <div className="p-auto flex flex-col justify-center rounded-lg border border-background/50 shadow-md sm:flex-row sm:p-4">
+    <div className="p-auto flex flex-col justify-center w-full rounded-lg border border-background/50 shadow-md sm:flex-row sm:p-4">
       <div className="flex w-auto justify-center sm:w-2/3 sm:justify-start">
         <img
           className="w-full rounded-lg object-cover"
-          src="https://picsum.photos/700?image=1"
+          src={product?.url}
           alt=""
           loading="lazy"
         />
@@ -19,13 +57,10 @@ export const ProductDetail = () => {
           <div className="flex h-7 w-20 items-center justify-center rounded-full bg-positive  text-center text-white">
             In Stock
           </div>
-          <div className="font-medium leading-relaxed text-black/60">
-            Category
-          </div>
         </div>
 
         <div className="flex flex-col gap-2 py-2">
-          <div className="text-2xl font-semibold">MacBook Air Pro</div>
+          <div className="text-2xl font-semibold">{product?.name}</div>
           <div className="mt-3 font-medium leading-tight text-black/60">
             Nivujapu rugugor gigbegi lisvabnun senam ohozufe womoezu odip tuw
             mokduz itno nissad ku feglo muamo pouf apsizra. Dibeset izunothob
@@ -33,31 +68,39 @@ export const ProductDetail = () => {
             hupzarliv ded bik tadepod.
           </div>
         </div>
-
         <div className="flex flex-col justify-center gap-y-6 border-y py-6 ">
           <div className="flex items-end gap-2">
-            <div className="text-lg font-medium text-black/40 line-through">
-              $12
-            </div>
-            <div className="text-4xl font-semibold">$15</div>
+            <div className="text-4xl font-semibold">${product?.price}</div>
           </div>
           <div className="flex items-center gap-2">
             <div className="text-lg font-semibold">Quantity</div>
             <div className="flex h-12 w-32 items-center justify-between rounded-md border  ">
               <button
-                className="h-12 w-1/3 text-2xl font-semibold duration-300 hover:bg-gray-100"
-                onClick={() => setCount(count - 1)}
+                disabled={quantity <= 1}
+                className="h-12 w-1/3 disabled:bg-gray-100 text-2xl font-semibold duration-300 hover:bg-gray-100"
+                onClick={() =>
+                  setQuantity((previous) => {
+                    {
+                      if (previous > 1) {
+                        return previous - 1;
+                      }
+                      return previous;
+                    }
+                  })
+                }
               >
                 -
               </button>
-              <input
-                className="h-10 w-1/3 text-center text-xl outline-none"
-                value={count}
-                onChange={({ target }) => setCount(Number(target.value))}
-              />
+              <span className="w-1/3 text-center text-xl outline-none">
+                {quantity}
+              </span>
               <button
                 className="h-12 w-1/3 text-2xl font-semibold duration-300 hover:bg-gray-100"
-                onClick={() => setCount(count + 1)}
+                onClick={() =>
+                  setQuantity((previous) => {
+                    return previous + 1;
+                  })
+                }
               >
                 +
               </button>
@@ -68,13 +111,33 @@ export const ProductDetail = () => {
         <div className="flex gap-4 py-6">
           <Link
             to="/checkout"
+            onClick={() => addItemCart({ ...(product as CartItem), quantity })}
             className="flex h-10 w-full items-center justify-center rounded-lg bg-primary px-6 font-medium text-white duration-300 hover:scale-105 hover:bg-primary/80 hover:shadow-md sm:w-auto"
           >
             Buy Now
           </Link>
-          <button className="flex h-10 w-full items-center justify-center rounded-lg  bg-warning px-6 font-medium text-white duration-300 hover:scale-105 hover:bg-warning/80 hover:shadow-md sm:w-auto">
+          <button
+            onClick={() => {
+              addItemCart({
+                ...(product as CartItem),
+                quantity,
+              });
+            }}
+            className="flex h-10 w-full items-center justify-center rounded-lg  bg-warning px-6 font-medium text-white duration-300 hover:scale-105 hover:bg-warning/80 hover:shadow-md sm:w-auto"
+          >
             Add To Cart
           </button>
+        </div>
+
+        <div className="flex flex-col justify-end  h-full ">
+          <div>
+            <Link
+              to="/"
+              className="rounded-lg  bg-primary/30 px-4 py-2 font-medium text-primary duration-300 hover:bg-primary/25"
+            >
+              Continue Shopping
+            </Link>
+          </div>
         </div>
       </div>
     </div>

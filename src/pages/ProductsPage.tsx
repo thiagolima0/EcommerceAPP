@@ -1,43 +1,80 @@
-import React from "react";
-import { ListGroup, ProductCard } from "../components";
+import { Loading, ProductCard } from "../components";
 import { HiOutlineSearch } from "react-icons/hi";
-import { Link } from "react-router-dom";
+import { useQuery } from "react-query";
+import { MenuCategory } from "../components/layout";
+import { Api } from "../providers/Api";
+import { CartItem, useFilterContext } from "../contexts";
+import { useEffect, useState } from "react";
+import { useOutletContext } from "react-router-dom";
 
-export const ProductsPage = () => {
+interface ProductsPageProps {
+  title: string;
+}
+
+export const ProductsPage = ({ title }: ProductsPageProps) => {
+  const { categoryIds } = useFilterContext();
+  const [filterProduct, setFilterProduct] = useState<string | null>(null);
+
+  const { setTitle } = useOutletContext<any>();
+
+  useEffect(() => {
+    setTitle(title);
+  }, []);
+
+  const {
+    data: products,
+    isLoading,
+    refetch,
+  } = useQuery(
+    ["products"],
+    async () => {
+      const { data } = await Api.get("/todos", {
+        params: {
+          userId: categoryIds,
+          title_like: `^${filterProduct === null ? "" : filterProduct}`,
+        },
+      });
+
+      return data.map(
+        ({ title: name, userId: categoryId, id: productId }: any) => ({
+          name,
+          categoryId,
+          productId,
+          price: name.length * productId,
+          url: `https://picsum.photos/700?image=${productId}`,
+        })
+      );
+    },
+    {
+      enabled: !categoryIds?.length,
+    }
+  );
+
+  useEffect(() => {
+    refetch();
+  }, [categoryIds]);
+
+  useEffect(() => {
+    if (filterProduct !== null) {
+      const timeOutId = setTimeout(() => refetch(), 250);
+      return () => clearTimeout(timeOutId);
+    }
+  }, [filterProduct]);
+
   return (
     <>
       <div className="flex flex-row rounded-lg border border-background/50 shadow-md">
         <div className="hidden rounded-lg border border-background/50 sm:block sm:w-1/2  md:w-1/3 lg:w-1/6">
-          <ListGroup />
-
-          <div className="m-5 flex flex-col gap-4 border-b pb-5 text-black/70">
-            <span className="text-xl font-semibold">Price</span>
-            <ul className="flex flex-col gap-4 font-medium">
-              <li className="flex items-center  gap-2">
-                <input type="radio" />
-                <span>Below $10</span>
-              </li>
-              <li className="flex items-center  gap-2">
-                <input type="radio" />
-                <span>$10 - $50</span>
-              </li>
-              <li className="flex items-center  gap-2">
-                <input type="radio" />
-                <span>$50 - $100</span>
-              </li>
-              <li className="flex items-center  gap-2">
-                <input type="radio" />
-                <span>Over $100</span>
-              </li>
-            </ul>
-          </div>
+          <MenuCategory />
         </div>
-
-        <div className="w-full flex-row flex-wrap p-6 ">
+        <div className="w-full flex-row flex-wrap p-6">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="text-xl font-semibold">Products</h2>
+            <h2 className="text-xl font-semibold">
+              Products ({products?.length})
+            </h2>
             <div className="relative">
               <input
+                onChange={(event) => setFilterProduct(event.target.value)}
                 placeholder="Search Product"
                 type="text"
                 className="block w-full rounded-lg border border-background bg-gray-50 px-8  py-2.5 text-sm text-gray-900 outline-none"
@@ -47,36 +84,17 @@ export const ProductsPage = () => {
               </div>
             </div>
           </div>
-
-          <div className="xs:grid-cols-1 mt-4 grid w-full gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-8">
-            <Link to="product/1">
-              <ProductCard url={`https://picsum.photos/400?image=1`} />
-            </Link>
-            <Link to="product/1">
-              <ProductCard url={`https://picsum.photos/400?image=2`} />
-            </Link>
-            <Link to="product/1">
-              <ProductCard url={`https://picsum.photos/400?image=3`} />
-            </Link>
-            <Link to="product/1">
-              <ProductCard url={`https://picsum.photos/400?image=4`} />
-            </Link>
-            <Link to="product/1">
-              <ProductCard url={`https://picsum.photos/400?image=8`} />
-            </Link>
-            <Link to="product/1">
-              <ProductCard url={`https://picsum.photos/400?image=6`} />
-            </Link>
-            <Link to="product/1">
-              <ProductCard />
-            </Link>
-            <Link to="product/1">
-              <ProductCard />
-            </Link>
-            <Link to="product/1">
-              <ProductCard />
-            </Link>
-          </div>
+          {isLoading ? (
+            <Loading />
+          ) : (
+            <div className="xs:grid-cols-1 mt-4 grid w-full gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-8">
+              {products?.map((product: CartItem) => {
+                return (
+                  <ProductCard product={product} key={product.productId} />
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </>
