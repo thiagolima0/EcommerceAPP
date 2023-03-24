@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { HiOutlineTrash } from "react-icons/hi";
 import { Link, useOutletContext } from "react-router-dom";
+import { QuantityProducts } from "../components";
 import { useCartContext } from "../contexts";
 import { numberToUSD } from "../utils/numberToUSD";
 
@@ -50,7 +51,12 @@ export const Checkout = ({ title }: CheckoutProps) => {
                     </div>
                   </th>
                   <td className="px-6 py-4">{numberToUSD(product.price)}</td>
-                  <td className="px-6 py-4">{product.quantity}</td>
+                  <td className="px-6 py-4">
+                    <QuantityProducts
+                      productId={product.productId}
+                      quantity={product.quantity}
+                    />
+                  </td>
                   <td className="px-6 py-4">
                     {numberToUSD(product.price * product.quantity)}
                   </td>

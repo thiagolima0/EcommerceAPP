@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useQuery } from "react-query";
 import { Link, useOutletContext, useParams } from "react-router-dom";
-import { Loading } from "../components";
+import { Loading, QuantityProducts } from "../components";
 import { CartItem, useCartContext } from "../contexts";
 import { Api } from "../providers/Api";
 
@@ -17,8 +17,7 @@ export const ProductDetail = ({ title }: ProductDetailProps) => {
     setTitle(title);
   }, []);
 
-  const { addItemCart, decreaseItemQuantity, getItemQuantity } =
-    useCartContext();
+  const { addItemCart } = useCartContext();
 
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
@@ -70,37 +69,11 @@ export const ProductDetail = ({ title }: ProductDetailProps) => {
           </div>
           <div className="flex items-center gap-2">
             <div className="text-lg font-semibold">Quantity</div>
-            <div className="flex h-12 w-32 items-center justify-between rounded-md border  ">
-              <button
-                disabled={quantity <= 1}
-                className="h-12 w-1/3 disabled:bg-gray-100 text-2xl font-semibold duration-300 hover:bg-gray-100"
-                onClick={() =>
-                  setQuantity((previous) => {
-                    {
-                      if (previous > 1) {
-                        return previous - 1;
-                      }
-                      return previous;
-                    }
-                  })
-                }
-              >
-                -
-              </button>
-              <span className="w-1/3 text-center text-xl outline-none">
-                {quantity}
-              </span>
-              <button
-                className="h-12 w-1/3 text-2xl font-semibold duration-300 hover:bg-gray-100"
-                onClick={() =>
-                  setQuantity((previous) => {
-                    return previous + 1;
-                  })
-                }
-              >
-                +
-              </button>
-            </div>
+            <QuantityProducts
+              quantity={quantity}
+              productId={product?.productId}
+              setQuantity={setQuantity}
+            />
           </div>
         </div>
 

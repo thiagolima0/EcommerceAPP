@@ -1,5 +1,4 @@
 import { createContext, ReactNode, useContext, useState } from "react";
-import { toast } from "react-hot-toast";
 import { increaseByValue } from "../utils";
 
 type CartProviderProps = {
@@ -108,7 +107,14 @@ export function CartProvider({ children }: CartProviderProps) {
   };
 
   const increaseItemQuantity = (id: number) => {
-    cartItems.find((item) => item.productId === id);
+    setCartItems((cartItems) => {
+      return cartItems.map((item) => {
+        if (item.productId === id) {
+          return { ...item, quantity: item.quantity + 1 };
+        }
+        return item;
+      });
+    });
   };
 
   return (

@@ -26,8 +26,9 @@ const Header = () => {
       <div className="mt-4 flex h-28 items-center justify-between rounded-lg bg-primary/10 px-6">
         <div>
           <h1 className="text-2xl font-semibold">Shop</h1>
-          <ul>
-            <li>{title} </li>
+          <ul className="flex gap-5">
+            <li className={`${title?.length && "font-semibold "}`}>Shop</li>
+            {title && <li className={`${title && "list-disc"}`}>{title}</li>}
           </ul>
         </div>
 
@@ -50,11 +51,10 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Header />,
-    errorElement: <div>Page not found!</div>,
     children: [
       {
         path: "/",
-        element: <ProductsPage title="Shop" />,
+        element: <ProductsPage title={null} />,
       },
       {
         path: "product/:id",

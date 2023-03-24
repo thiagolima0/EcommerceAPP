@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 
 interface ProductsPageProps {
-  title: string;
+  title: string | null;
 }
 
 export const ProductsPage = ({ title }: ProductsPageProps) => {
