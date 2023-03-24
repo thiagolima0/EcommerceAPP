@@ -1,3 +1,4 @@
+import { toast } from "react-hot-toast";
 import { HiShoppingCart } from "react-icons/hi";
 import { useNavigate } from "react-router-dom";
 import { CartItem, useCartContext } from "../contexts";
@@ -25,7 +26,10 @@ export const ProductCard = ({ product }: ProductCardProps) => {
           {numberToUSD(product.price)}
         </span>
         <button
-          onClick={() => addItemCart(product)}
+          onClick={() => {
+            addItemCart(product);
+            toast.success("Added to cart!");
+          }}
           className="absolute -top-6 right-6 hover:scale-125 duration-300 flex h-10 w-10 items-center justify-center rounded-full bg-primary shadow-md"
         >
           <HiShoppingCart color="white" size={20} />

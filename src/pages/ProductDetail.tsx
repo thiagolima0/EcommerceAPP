@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toast } from "react-hot-toast";
 import { useQuery } from "react-query";
 import { Link, useOutletContext, useParams } from "react-router-dom";
 import { Loading } from "../components";
@@ -22,12 +23,7 @@ export const ProductDetail = ({ title }: ProductDetailProps) => {
   const { id } = useParams();
   const [quantity, setQuantity] = useState(1);
 
-  const {
-    data: product,
-    isLoading,
-    isSuccess,
-    error,
-  } = useQuery(["productId"], async () => {
+  const { data: product, isLoading } = useQuery(["productId"], async () => {
     const { data } = await Api.get(`/todos/${id}`);
 
     const { title: name, userId: categoryId, id: productId } = data;
@@ -122,6 +118,7 @@ export const ProductDetail = ({ title }: ProductDetailProps) => {
                 ...(product as CartItem),
                 quantity,
               });
+              toast.success("Added to cart!");
             }}
             className="flex h-10 w-full items-center justify-center rounded-lg  bg-warning px-6 font-medium text-white duration-300 hover:scale-105 hover:bg-warning/80 hover:shadow-md sm:w-auto"
           >

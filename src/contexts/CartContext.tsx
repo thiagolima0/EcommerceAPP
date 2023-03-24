@@ -1,4 +1,5 @@
 import { createContext, ReactNode, useContext, useState } from "react";
+import { toast } from "react-hot-toast";
 import { increaseByValue } from "../utils";
 
 type CartProviderProps = {

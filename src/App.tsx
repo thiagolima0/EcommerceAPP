@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Toaster } from "react-hot-toast";
 import { HiOutlineShoppingCart } from "react-icons/hi";
 import { QueryClient, QueryClientProvider } from "react-query";
 import {
@@ -72,6 +73,9 @@ function App() {
     <CartProvider>
       <FilterContextProvider>
         <QueryClientProvider client={queryClient}>
+          <div>
+            <Toaster />
+          </div>
           <div className="container mx-auto flex flex-col gap-y-4">
             <RouterProvider router={router} />
           </div>
