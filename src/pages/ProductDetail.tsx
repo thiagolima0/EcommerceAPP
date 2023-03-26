@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useQuery } from "react-query";
 import { Link, useOutletContext, useParams } from "react-router-dom";
@@ -15,6 +15,7 @@ export const ProductDetail = ({ title }: ProductDetailProps) => {
 
   useEffect(() => {
     setTitle(title);
+    window.document.title = title;
   }, []);
 
   const { addItemCart } = useCartContext();

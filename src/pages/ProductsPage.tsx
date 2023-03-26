@@ -19,6 +19,7 @@ export const ProductsPage = ({ title }: ProductsPageProps) => {
 
   useEffect(() => {
     setTitle(title);
+    window.document.title = title as string;
   }, []);
 
   const {
